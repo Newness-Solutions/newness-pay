@@ -5,27 +5,27 @@ const app = express();
 
 require('dotenv').config();
 
-const port = process.env.PORT || 5000;
-
-const uri = process.env.ATLAS_URI;
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useUnifiedTopology: true,
-});
-
-const connection = mongoose.connection;
-connection.once('open', () => {
-  console.log('MongoDB connection established successfully');
-});
-
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const port = process.env.PORT || 5000;
+
+// const uri = process.env.ATLAS_URI;
+// mongoose.connect(uri, {
+//   useNewUrlParser: true,
+//   useCreateIndex: true,
+//   useUnifiedTopology: true,
+// });
+
+// const connection = mongoose.connection;
+// connection.once('open', () => {
+//   console.log('MongoDB connection established successfully');
+// });
 
 const usersRouter = require('./app/routes/users');
 const dbConfig = require('./app/config/db.config');
 
-app.use('/users', usersRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
@@ -40,7 +40,7 @@ db.mongoose
     useUnifiedTopology: true
   })
   .then(() => {
-    console.log("Successfully connect to MongoDB.");
+    console.log("Successfully connect to MongoDB");
     initial();
   })
   .catch(err => {
@@ -84,5 +84,6 @@ function initial() {
   });
 }
 
+app.use('/users', usersRouter);
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);

@@ -1,6 +1,23 @@
 const db = require("../models");
 const ROLES = db.ROLES;
 const User = db.user;
+const { body, validationResult } = require('express-validator');
+const validatePhone = require("validate-phone-number-node-js");
+
+let validateAll = (req, res, next) => {
+  body('email').notEmpty().isEmail().normalizeEmail();
+  body('password').notEmpty().isLength({min:6});
+  body('username').notEmpty().trim();
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(400).json({ message: errors.array() });
+
+  }
+
+  next();
+
+}
 
 let checkDuplicateUsernameOrEmail = (req, res, next) => {
   // Username
@@ -41,7 +58,7 @@ let checkRolesExisted = (req, res, next) => {
     for (let i = 0; i < req.body.roles.length; i++) {
       if (!ROLES.includes(req.body.roles[i])) {
         res.status(400).send({
-          message: `Failed! Role ${req.body.roles[i]} does not exist!`
+          message: 'Failed! Role ${req.body.roles[i]} does not exist!'
         });
         return;
       }
@@ -51,9 +68,28 @@ let checkRolesExisted = (req, res, next) => {
   next();
 };
 
+let isValidPhoneNumber = (req, res, next) => {
+  if(req.body.phone){
+    if(!validatePhone.validate(req.body.phone)){
+      res.status(400).send({
+        message: 'Invalid phone number'
+      });
+      return;
+    }
+  }else{
+    res.status(400).send({
+      message: 'Phone number required'
+    });
+    return;
+  }
+  next();
+};
+
 const verifySignUp = {
+  validateAll,
   checkDuplicateUsernameOrEmail,
-  checkRolesExisted
+  checkRolesExisted,
+  isValidPhoneNumber
 };
 
 module.exports = verifySignUp;

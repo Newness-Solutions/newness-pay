@@ -14,6 +14,11 @@ module.exports = function(app) {
 
   app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
 
+  app.get("/api/test/user/:id", [authJwt.verifyToken, authJwt.sameUser], controller.userGet);
+  app.delete("/api/test/user/:id", [authJwt.verifyToken, authJwt.sameUser], controller.userDelete);
+  app.put("/api/test/user/:id", [authJwt.verifyToken, authJwt.sameUser], controller.userUpdate);
+
+
   app.get(
     "/api/test/mod",
     [authJwt.verifyToken, authJwt.isModerator],

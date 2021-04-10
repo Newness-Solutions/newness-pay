@@ -20,6 +20,26 @@ let verifyToken = (req, res, next) => {
   });
 };
 
+let sameUser = (req, res, next) => {
+  let token = req.headers["x-access-token"];
+
+  if(!token){
+    return res.status(403).send({message: "No token provided!"});
+  }
+
+  jwt.verify(token, config.secret, (err, decode) =>{
+    if(err){
+      return res.status(401).send({message: "Unauthorized!" });
+    }
+    if(req.userId == req.params.id){
+      next();
+    }else{
+      return res.status(401).send({message: "Unauthorized action!"})
+    }
+  })
+
+};
+
 let isAdmin = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
@@ -84,6 +104,7 @@ let isModerator = (req, res, next) => {
 
 const authJwt = {
   verifyToken,
+  sameUser,
   isAdmin,
   isModerator
 };
