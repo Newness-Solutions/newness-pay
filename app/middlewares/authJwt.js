@@ -3,6 +3,7 @@ const config = require("../config/auth.config.js");
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
+const UserGroup = db.userGroup;
 
 let verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
@@ -71,6 +72,27 @@ let isAdmin = (req, res, next) => {
   });
 };
 
+let checkDuplicateEmail = (req, res, next) => {
+
+  // Email
+  UserGroup.findOne({
+    userId: req.userId,
+    email: req.body.email
+  }).exec((err, user) => {
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+
+    if (user) {
+      res.status(400).send({ message: "Failed! Email is already in use!" });
+      return;
+    }
+
+    next();
+  });
+};
+
 let isModerator = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
@@ -102,10 +124,12 @@ let isModerator = (req, res, next) => {
   });
 };
 
+
 const authJwt = {
   verifyToken,
   sameUser,
   isAdmin,
+  checkDuplicateEmail,
   isModerator
 };
 module.exports = authJwt;

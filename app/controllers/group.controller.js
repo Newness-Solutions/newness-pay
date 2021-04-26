@@ -1,10 +1,21 @@
 const db = require("../models");
 const Group = db.group;
-const Role = db.role;
 const User = db.user;
 
 
-exports.groupGetAll = (req, res) => {
+exports.groupCreate = (req, res) => {
+    const newGroup = new Group({group_name: req.body.groupName, created_by: req.userId});
+    newGroup.save()
+    .then(grp => {
+        res.status(200).send(grp)
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Error creating group"
+        });
+    });
+  };
+  
+  exports.groupGetAll = (req, res) => {
     Group.find()
       .then((groups) => res.status(200).send(groups))
       .catch((err) => res.status(400).json('Error: ' + err));
@@ -23,19 +34,19 @@ exports.groupGet = (req, res) => {
   };
 
   exports.groupUpdate = (req, res) => {
-    if(!req.body.gname) {
+    if(!req.body.groupName) {
       return res.status(400).send({
-          message: "Username is required"
+          message: "Group name is required"
       });
     }
 
     Group.findByIdAndUpdate({_id: req.params.id},
       {
-        group_name:  req.body.gname
+        group_name:  req.body.groupName
   
       }, 
       {new: true})
-      .then((group) => res.status(200).send(group))
+      .then((groups) => res.status(200).send(groups))
       .catch((err) => res.status(400).json('Error: ' + err))
 
   }; 

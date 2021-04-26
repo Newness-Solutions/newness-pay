@@ -1,4 +1,4 @@
-const mongoose = require("mangoose");
+const mongoose = require("mongoose");
 
 const Group = mongoose.model(
     "Group",
@@ -9,8 +9,10 @@ const Group = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
             }
-        ],
-        date_created: String
+        ]
+    },
+    {
+        timestamps:true
     })
 );
 

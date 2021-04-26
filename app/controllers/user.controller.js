@@ -1,20 +1,4 @@
-let User = require('../models/user.model');
-
-exports.allAccess = (req, res) => {
-  res.status(200).send("Public Content.");
-};
-
-exports.userBoard = (req, res) => {
-  res.status(200).send("User Content.");
-};
-
-exports.adminBoard = (req, res) => {
-  res.status(200).send("Admin Content.");
-};
-
-exports.moderatorBoard = (req, res) => {
-  res.status(200).send("Moderator Content.");
-};
+const User = require('../models/user.model');
 
 exports.userGet = (req, res) => {
   User.findById(req.params.id)
@@ -57,24 +41,11 @@ exports.userUpdate = (req, res) => {
     {new: true})
     .then(user => res.status(200).send(user))
     .catch((err) => res.status(400).json('Error: ' + err))
-    // .then((users) => {
-    //   users.username = req.body.username;
-    //   users.email = req.body.email;
-    //   users.phone_number = req.body.phone;
-    //   // users.password = bcrypt.hash(req.body.password, 10, function (hash, err) {
-    //   //   if (err) {
-    //   //     return err;
-    //   //   }
-    //   //   users.password = hash;
-    //   // });
-    //   users.date_modified = new Date();
-
-
-    //   users
-    //     .save()
-    //     .then(() => res.json('User updated Successfully'))
-    //     .catch((err) => res.status(400).json('Error: ' + err));
-    // })
-    // .catch((err) => res.status(400).json('Error: ' + err));
 
 }; 
+
+exports.userGetAll = (req, res) => {
+  User.find()
+    .then((users) => res.status(200).send(users))
+    .catch((err) => res.status(400).json('Error: ' + err));
+};
