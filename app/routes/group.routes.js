@@ -1,7 +1,9 @@
 const { authJwt } = require("../middlewares");
 const groupCon = require("../controllers/group.controller");
 const userGroupCon = require("../controllers/userGroup.controller");
-// const { authJwt } = require("../middlewares");
+const eSend = require("../controllers/email.controller");
+const { body, validationResult } = require('express-validator');
+
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -22,4 +24,21 @@ module.exports = function(app) {
   app.post("/api/test/addUserGroup/", [authJwt.verifyToken,authJwt.checkDuplicateEmail, authJwt.isAdmin], userGroupCon.addGroupUser);
   app.delete("/api/test/deleteUserGroup/", [authJwt.verifyToken, authJwt.isAdmin], userGroupCon.deleteGroupUser);
   app.put("/api/test/validateEmail/:id", userGroupCon.validateUserEmail);
+  app.post(
+    "/api/sendEmail/",
+    [
+      body('to','Valid email required').notEmpty().isEmail(),
+      body('subject','Email subject cannot be empty').notEmpty().trim(),
+
+    ],
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }else{
+        eSend.emailsend(req, res);
+      }
+    }
+    
+     );
 }
