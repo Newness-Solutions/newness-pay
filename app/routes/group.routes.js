@@ -27,7 +27,7 @@ module.exports = function(app) {
   app.post(
     "/api/sendEmail/",
     [
-      body('to','Valid email required').notEmpty().isEmail(),
+      body('to','Valid email(s) required').notEmpty(),
       body('subject','Email subject cannot be empty').notEmpty().trim(),
 
     ],

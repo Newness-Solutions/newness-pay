@@ -55,10 +55,10 @@ let checkDuplicateUsernameOrEmail = (req, res, next) => {
 
 let checkRolesExisted = (req, res, next) => {
   if (req.body.roles) {
-    for (let i = 0; i < req.body.roles.length; i++) {
-      if (!ROLES.includes(req.body.roles[i])) {
+    for(const value of req.body.roles){
+      if(!ROLES.includes(value)){
         res.status(400).send({
-          message: 'Failed! Role ${req.body.roles[i]} does not exist!'
+          message: 'Failed! Role ${value} does not exist!'
         });
         return;
       }

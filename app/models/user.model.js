@@ -10,6 +10,12 @@ const User = mongoose.model(
     date_created: String,
     date_modified: String,
     password: String,
+    isValidated: {
+      type: Boolean,
+      default: false,
+      required: true,
+
+    },
     roles: [
       {
         type: mongoose.Schema.Types.ObjectId,

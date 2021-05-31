@@ -1,5 +1,6 @@
 
 const nodemailer = require("nodemailer");
+require('dotenv').config();
 
 // async..await is not allowed in global scope, must use a wrapper
 exports.emailsend = async function(req,res) {
@@ -10,8 +11,8 @@ exports.emailsend = async function(req,res) {
     port: 465,
     secure: true, // true for 465, false for other ports
     auth: {
-      user: "info@newnesol.com", // generated ethereal user
-      pass: "#info@email#~", // generated ethereal password
+      user: process.env.USER, // generated ethereal user
+      pass: process.env.PASSWORD, // generated ethereal password
     },
   });
 
@@ -25,8 +26,8 @@ exports.emailsend = async function(req,res) {
   };
 
   // send mail with defined transport object
-  let info = transporter.sendMail(mailOptions,
-     (err)=>{
+   transporter.sendMail(mailOptions,
+     (err, info)=>{
        if(err){
          console.log(err);
          return res.status(400).send({message: "Email could not be sent "})

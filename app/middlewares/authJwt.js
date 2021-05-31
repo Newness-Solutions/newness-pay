@@ -58,15 +58,14 @@ let isAdmin = (req, res, next) => {
           return;
         }
 
-        for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "admin") {
+        for (const value of roles){
+          if(value === "admin"){
             next();
             return;
           }
         }
 
         res.status(403).send({ message: "Require Admin Role!" });
-        return;
       }
     );
   });
@@ -110,15 +109,15 @@ let isModerator = (req, res, next) => {
           return;
         }
 
-        for (let i = 0; i < roles.length; i++) {
-          if (roles[i].name === "moderator") {
+        for (const value of roles){
+          if(value === "moderator"){
             next();
             return;
           }
         }
 
         res.status(403).send({ message: "Require Moderator Role!" });
-        return;
+        
       }
     );
   });
