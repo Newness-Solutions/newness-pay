@@ -45,4 +45,17 @@ module.exports = function(app) {
       
     } 
   );
+
+  app.post("/api/auth/confirmEmail",
+    body('email','Invalid email').notEmpty().isEmail(),
+    body('code','Invalid confirmation code').notEmpty().isLength({min:6, max:6}).isAlphanumeric(),
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }else{
+        controller.checkCode(req, res);
+      }
+    }   
+  );
 };

@@ -10,6 +10,10 @@ const User = mongoose.model(
     date_created: String,
     date_modified: String,
     password: String,
+    confirmCode:{
+      type: String,
+      unique:true
+    },
     isValidated: {
       type: Boolean,
       default: false,

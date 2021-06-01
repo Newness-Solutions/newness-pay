@@ -44,7 +44,7 @@ exports.userUpdate = (req, res) => {
 
 }; 
 
-exports.userGetAll = (req, res) => {
+exports.userGetAll = (_req, res) => {
   User.find()
     .then((users) => res.status(200).send(users))
     .catch((err) => res.status(400).json('Error: ' + err));
