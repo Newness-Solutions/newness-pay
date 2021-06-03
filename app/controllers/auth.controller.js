@@ -25,7 +25,7 @@ exports.signup = (req, res) => {
       res.status(500).send({ message: err });
       return;
     }
-    const confirmMail = await mail.regConfirmaation(req.body.email, req.body.username, code);
+    const confirmMail = await mail.regConfirmation(req.body.email, req.body.username, code);
 
     if (req.body.roles) {
       Role.find(
@@ -100,8 +100,14 @@ exports.signin = (req, res) => {
       }
 
       if(!user.isValidated){
-        return res.status(401).send({message: "Unvalidated user account"})
+        return res.status(401).send({message: "Unvalidated user account"});
       }
+
+      if(user.twoStepCode){ //if two-step vefication is active
+        mail.twoStepVerifMail(user.email, user.username, user.twoStepCode);
+        return res.status(200).send({id: user._id, message: "Enter code from email"});
+
+      }else{
 
       var token = jwt.sign({ id: user.id }, config.secret, {
         expiresIn: 86400 // 24 hours
@@ -121,8 +127,50 @@ exports.signin = (req, res) => {
         roles: authorities,
         accessToken: token
       });
+    }
     });
 };
+
+exports.twoStepVerif = (req, res) => {
+  User.findById(req.body.id)
+  .populate("roles", "-__v")
+  .exec((err, user) => {
+    if (err) {
+      return  res.status(500).send({ message: "Invalid user ID"});
+    }
+    if(user.twoStepCode != req.body.twoStepCode){
+      return res.status(400).send({message: "Invalid two-step verification code"});
+    }else{
+      const twoStepCode = createId.makeId(5);
+      User.findByIdAndUpdate({_id:req.body.id},
+        {
+          twoStepCode: twoStepCode
+        },
+        {new: true})
+        .then((nUser) => {
+          var token = jwt.sign({ id: nUser._id }, config.secret, {
+            expiresIn: 86400 // 24 hours
+          });
+    
+          var authorities = [];
+    
+          for(const val of user.roles){
+            authorities.push("ROLE_"+ val.name.toUpperCase());
+          }
+          return res.status(200).send({
+            id: nUser._id,
+            username: nUser.username,
+            email: nUser.email,
+            phone: nUser.phone_number,
+            date_created: nUser.date_created,
+            roles: authorities,
+            accessToken: token
+          })
+        })  
+        .catch((error) => res.status(400).send(error))
+    }
+  })
+}
 
 exports.checkCode = (req, res) => {
   User.findOne({
@@ -163,7 +211,7 @@ exports.checkCode = (req, res) => {
             accessToken: token
           })
         })
-        .catch((error) => {res.status(400).send({message1: error})})
+        .catch((error) => {res.status(400).send({message: error})})
     }else{
       return res.status(400).send({message: "Invalid Confirmation code"});
     }

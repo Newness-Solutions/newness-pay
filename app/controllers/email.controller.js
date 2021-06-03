@@ -11,16 +11,15 @@ exports.emailsend = async function(req,res) {
     port: 465,
     secure: true, // true for 465, false for other ports
     auth: {
-      user: process.env.USER, // generated ethereal user
-      pass: process.env.PASSWORD, // generated ethereal password
+      user: process.env.USER, 
+      pass: process.env.PASSWORD, 
     },
   });
 
   var mailOptions = {
     from: '"Fapshi" info@newnesol.com', // sender address
-    to: req.body.to, // list of receivers
+    to: req.body.to, // receiver
     subject: req.body.subject, // Subject line
-    text: "Yes yes", // plain text body
     html: req.body.content // html body
 
   };

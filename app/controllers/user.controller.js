@@ -1,4 +1,5 @@
 const User = require('../models/user.model');
+const createId = require('../middlewares/Ids');
 
 exports.userGet = (req, res) => {
   User.findById(req.params.id)
@@ -49,3 +50,25 @@ exports.userGetAll = (_req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => res.status(400).json('Error: ' + err));
 };
+
+exports.enableTwoStep = (req, res) => {
+  const twoStepCode = createId.makeId(5);
+  User.findByIdAndUpdate({_id:req.userId},
+    {
+      twoStepCode: twoStepCode
+    },
+    {new: true})
+    .then(() => res.status(200).send({message:"Two step authentification enabled successfully!"}))
+    .catch((err) => res.status(400).send(err));
+}
+
+exports.disableTwoStep = (req, res) => {
+  const twoStepCode = null;
+  User.findByIdAndUpdate({_id:req.userId},
+    {
+      twoStepCode: twoStepCode
+    },
+    {new: true})
+    .then(() => res.status(200).send({message:"Two step authentification disabled successfully!"}))
+    .catch((err) => res.status(400).send(err));
+}

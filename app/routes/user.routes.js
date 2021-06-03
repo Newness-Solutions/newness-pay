@@ -27,4 +27,17 @@ module.exports = function(app) {
       authJwt.sameUser
     ], controller.userUpdate);
 
+  app.put(
+    "/api/test/enableTwoStep", 
+    [
+      authJwt.verifyToken
+    ], 
+    controller.enableTwoStep);
+    
+  app.put(
+    "/api/test/disableTwoStep", 
+    [
+      authJwt.verifyToken
+    ], 
+    controller.disableTwoStep);  
 };

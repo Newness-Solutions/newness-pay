@@ -10,8 +10,16 @@ const User = mongoose.model(
     date_created: String,
     date_modified: String,
     password: String,
+    twoStepCode:{
+      type: String,
+      default: null,
+      maxlength: 5,
+      minlength: 5,
+    },
     confirmCode:{
       type: String,
+      maxlength: 6,
+      minlength: 6,
       unique:true
     },
     isValidated: {
