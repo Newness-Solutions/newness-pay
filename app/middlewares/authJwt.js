@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
+const bcrypt = require("bcryptjs");
 const User = db.user;
 const Role = db.role;
 const UserGroup = db.userGroup;
@@ -40,6 +41,23 @@ let sameUser = (req, res, next) => {
   })
 
 };
+
+let validPassword = (req, res, next) => {
+  User.findById(req.userId)
+  .then((user)=>{
+    var isValidPass = bcrypt.compareSync(
+      req.body.oldPass,
+      user.password
+    );
+    if(isValidPass){
+      next();
+    }else{
+      return res.status(400).send({message: "Invalid old password"})
+    }
+  })
+  .catch((err)=>{return res.status(500).send({ message: err });})
+  
+}
 
 let isAdmin = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
@@ -127,6 +145,7 @@ let isModerator = (req, res, next) => {
 const authJwt = {
   verifyToken,
   sameUser,
+  validPassword,
   isAdmin,
   checkDuplicateEmail,
   isModerator

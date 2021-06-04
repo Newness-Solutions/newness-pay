@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const createId = require('../middlewares/Ids');
+const bcrypt = require("bcryptjs");
 
 exports.userGet = (req, res) => {
   User.findById(req.params.id)
@@ -44,6 +45,16 @@ exports.userUpdate = (req, res) => {
     .catch((err) => res.status(400).json('Error: ' + err))
 
 }; 
+
+exports.updatePass = (req, res) => {
+  User.findByIdAndUpdate({_id:req.userId},
+    {
+      password: bcrypt.hashSync(req.body.newPass, 8)
+    },
+    {new: true})
+    .then(() => res.status(200).send({message:"Password updated successfully!"}))
+    .catch((err) => res.status(400).send(err));
+}
 
 exports.userGetAll = (_req, res) => {
   User.find()

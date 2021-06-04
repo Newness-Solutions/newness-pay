@@ -1,6 +1,6 @@
 const { authJwt } = require("../middlewares");
 const controller = require("../controllers/user.controller");
-// const { body, validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -26,6 +26,26 @@ module.exports = function(app) {
       authJwt.verifyToken, 
       authJwt.sameUser
     ], controller.userUpdate);
+    
+  app.put(
+    "/api/test/reset-password/:id",
+    body('oldPass').notEmpty().isLength({min:6}),
+    body('newPass').notEmpty().isLength({min:6}),
+    [
+      authJwt.verifyToken, 
+      authJwt.sameUser,
+      authJwt.validPassword
+    ],
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }else{
+        controller.updatePass(req, res);
+      }
+    }  
+  );
+
 
   app.put(
     "/api/test/enableTwoStep", 
