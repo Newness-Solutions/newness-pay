@@ -110,6 +110,24 @@ let checkDuplicateEmail = (req, res, next) => {
   });
 };
 
+let emailExists = (req, res, next) =>{
+  if(!req.body.email){
+    return res.status(400).send({message: "Email required!"})
+  }
+  User.findOne({email:req.body.email})
+  .then((user)=>{
+    if(user){
+      req.username = user.username;
+      req.userId = user._id;
+      next();
+    }else{
+      return res.status(400).send({messsge: "No user account with this email"})
+    }
+  })
+  .catch((err)=>{ return res.status(500).send({ message: "No user account with this email!" }); })
+
+}
+
 let isModerator = (req, res, next) => {
   User.findById(req.userId).exec((err, user) => {
     if (err) {
@@ -148,6 +166,7 @@ const authJwt = {
   validPassword,
   isAdmin,
   checkDuplicateEmail,
+  emailExists,
   isModerator
 };
 module.exports = authJwt;

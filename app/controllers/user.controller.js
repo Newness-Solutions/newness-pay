@@ -1,6 +1,8 @@
 const User = require('../models/user.model');
 const createId = require('../middlewares/Ids');
 const bcrypt = require("bcryptjs");
+const mail = require("../middlewares/emailSend");
+const controller = require("../controllers/user.controller");
 
 exports.userGet = (req, res) => {
   User.findById(req.params.id)
@@ -56,6 +58,25 @@ exports.updatePass = (req, res) => {
     .catch((err) => res.status(400).send(err));
 }
 
+exports.changePass = (req, res) => {
+  if(!req.body.secret){
+    return res.status(403).send();
+  }else{
+    User.findById(req.params.id)
+    .then((user)=>{
+      const s = user.passCode;
+      const secret = s.slice(5);
+      if(secret != req.body.secret){
+        return res.status(400).send();
+      }else{
+        req.userId = req.params.id;
+        controller.updatePass(req, res);
+      }
+    })
+    .catch((err) => res.status(400).send(err))
+  }
+}
+
 exports.userGetAll = (_req, res) => {
   User.find()
     .then((users) => res.status(200).send(users))
@@ -82,4 +103,37 @@ exports.disableTwoStep = (req, res) => {
     {new: true})
     .then(() => res.status(200).send({message:"Two step authentification disabled successfully!"}))
     .catch((err) => res.status(400).send(err));
+}
+
+exports.sendPassCode = async (req, res) => {
+  const passCode = createId.makeId(9);
+  const userCode = passCode.slice(0,5);
+  mail.passCode(req.body.email, req.username, userCode);
+  User.findByIdAndUpdate({_id:req.userId},
+    {
+      passCode: passCode
+    },
+    {new: true})
+    .then((user) => res.status(200).send({id:user._id, message:"Password change code has been sent successfully!"}))
+    .catch((err) => res.status(400).send(err));
+}
+
+exports.checkPassCode = (req, res) => {
+  User.findById(req.params.id)
+    .then((users) => {
+      if(users){
+        const passCode = users.passCode.slice(0,5);
+        if(passCode == req.body.passCode){
+          const secret = users.passCode.slice(5)
+          return res.status(200).send({secret:secret}); 
+        }else{
+          return res.status(400).send({message:"Invalid code"}); 
+        }
+      }else{
+        return res.status(400).send({message:"Invalid URL"});
+      }
+      
+    })
+    .catch(() => res.status(400).send({message:"Invalid URL"}));
+
 }

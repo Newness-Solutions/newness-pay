@@ -46,6 +46,19 @@ module.exports = function(app) {
     }  
   );
 
+  app.put(
+    "/api/test/change-password/:id",
+    body('newPass').notEmpty().isLength({min:6}),
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }else{
+        controller.changePass(req, res);
+      }
+    }  
+
+  )
 
   app.put(
     "/api/test/enableTwoStep", 
@@ -60,4 +73,26 @@ module.exports = function(app) {
       authJwt.verifyToken
     ], 
     controller.disableTwoStep);  
+
+  app.post(
+    "/api/test/user/send-password-code", 
+    [
+      authJwt.emailExists
+    ], 
+    controller.sendPassCode);  
+
+  app.put(
+    "/api/test/user/check-password-code/:id",
+    body('passCode').notEmpty().isLength({min:5, max:5}).isAlphanumeric(),
+  
+    (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }else{
+        controller.checkPassCode(req, res);
+      }
+    }  
+  );
+
 };

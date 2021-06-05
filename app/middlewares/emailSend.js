@@ -48,3 +48,28 @@ exports.twoStepVerifMail = (email, username, code) => {
     .catch((err)=>{console.log(err.response); return "Confirmation email could not be sent";})
 
 }
+
+exports.passCode = (email, username, code) => {
+    const url = '/api/sendEmail/';
+    var option = {
+        to: email,
+        subject: "Password Verification Code",
+        content: `
+        <h3>Hello ${username},</h3>
+        <p>Change your password by entering the following code:</p>
+        <h4><b> ${code}</b></h4>
+        <p>Thank you for trusting us!</p>
+        </div>`
+
+    };
+    const config = {
+        proxy:{
+            host:'localhost',
+            port:'5000'
+        }
+    };
+    axios.post(url,option,config)
+    .then(()=>{return "Confirmation email sent";})
+    .catch((err)=>{console.log(err.response); return "Confirmation email could not be sent";})
+
+}
