@@ -23,24 +23,14 @@ let verifyToken = (req, res, next) => {
 };
 
 let sameUser = (req, res, next) => {
-  let token = req.headers["x-access-token"];
-
-  if(!token){
-    return res.status(403).send({message: "No token provided!"});
+  // This method be used with the verifyToken methood.
+  if(req.userId == req.params.id){
+    next();
+  }else{
+    return res.status(401).send({message: "Unauthorized action!"});
   }
-
-  jwt.verify(token, config.secret, (err, decode) =>{
-    if(err){
-      return res.status(401).send({message: "Unauthorized!" });
-    }
-    if(req.userId == req.params.id){
-      next();
-    }else{
-      return res.status(401).send({message: "Unauthorized action!"})
-    }
-  })
-
 };
+
 
 let validPassword = (req, res, next) => {
   User.findById(req.userId)
@@ -65,32 +55,29 @@ let isAdmin = (req, res, next) => {
       res.status(500).send({ message: err });
       return;
     }
-
     Role.find(
       {
         _id: { $in: user.roles }
       },
-      (err, roles) => {
-        if (err) {
-          res.status(500).send({ message: err });
+      (err1, roles) => {
+        if (err1) {
+          res.status(500).send({ message: err1 });
           return;
         }
-
         for (const value of roles){
           if(value === "admin"){
             next();
             return;
           }
         }
-
         res.status(403).send({ message: "Require Admin Role!" });
       }
     );
   });
 };
 
-let checkDuplicateEmail = (req, res, next) => {
 
+let checkDuplicateEmail = (req, res, next) => {
   // Email
   UserGroup.findOne({
     userId: req.userId,
@@ -100,15 +87,14 @@ let checkDuplicateEmail = (req, res, next) => {
       res.status(500).send({ message: err });
       return;
     }
-
     if (user) {
       res.status(400).send({ message: "Failed! Email is already in use!" });
       return;
     }
-
     next();
   });
 };
+
 
 let emailExists = (req, res, next) =>{
   if(!req.body.email){
@@ -124,7 +110,7 @@ let emailExists = (req, res, next) =>{
       return res.status(400).send({messsge: "No user account with this email"})
     }
   })
-  .catch((err)=>{ return res.status(500).send({ message: "No user account with this email!" }); })
+  .catch(()=>{ return res.status(500).send({ message: "No user account with this email!" }); })
 
 }
 
@@ -139,21 +125,18 @@ let isModerator = (req, res, next) => {
       {
         _id: { $in: user.roles }
       },
-      (err, roles) => {
-        if (err) {
-          res.status(500).send({ message: err });
+      (err1, roles) => {
+        if (err1) {
+          res.status(500).send({ message: err1 });
           return;
         }
-
         for (const value of roles){
           if(value === "moderator"){
             next();
             return;
           }
         }
-
-        res.status(403).send({ message: "Require Moderator Role!" });
-        
+        res.status(403).send({ message: "Require Moderator Role!" });        
       }
     );
   });

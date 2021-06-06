@@ -1,23 +1,8 @@
 const db = require("../models");
 const ROLES = db.ROLES;
 const User = db.user;
-const { body, validationResult } = require('express-validator');
 const validatePhone = require("validate-phone-number-node-js");
 
-let validateAll = (req, res, next) => {
-  body('email').notEmpty().isEmail().normalizeEmail();
-  body('password').notEmpty().isLength({min:6});
-  body('username').notEmpty().trim();
-
-  const errors = validationResult(req);
-  if(!errors.isEmpty()){
-    return res.status(400).json({ message: errors.array() });
-
-  }
-
-  next();
-
-}
 
 let checkDuplicateUsernameOrEmail = (req, res, next) => {
   // Username
@@ -28,26 +13,23 @@ let checkDuplicateUsernameOrEmail = (req, res, next) => {
       res.status(500).send({ message: err });
       return;
     }
-
     if (user) {
       res.status(400).send({ message: "Failed! Username is already in use!" });
       return;
     }
-
     // Email
     User.findOne({
       email: req.body.email
-    }).exec((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
+    }).exec((err1, users) => {
+      if (err1) {
+        res.status(500).send({ message: err1 });
         return;
       }
 
-      if (user) {
+      if (users) {
         res.status(400).send({ message: "Failed! Email is already in use!" });
         return;
       }
-
       next();
     });
   });
@@ -58,13 +40,12 @@ let checkRolesExisted = (req, res, next) => {
     for(const value of req.body.roles){
       if(!ROLES.includes(value)){
         res.status(400).send({
-          message: 'Failed! Role ${value} does not exist!'
+          message: `Failed! Role ${value} does not exist!`
         });
         return;
       }
     }
   }
-
   next();
 };
 

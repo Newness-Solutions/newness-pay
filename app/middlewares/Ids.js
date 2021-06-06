@@ -9,5 +9,3 @@ exports.makeId =  (length) => {
    return result.join('');
   }
 
-//   const createId = {makeId};
-//   export default createId;

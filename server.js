@@ -1,38 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const app = express();
-
+const db = require("./app/models");
+const Role = db.role;
+const usersRouter = require('./app/routes/users');
+const dbConfig = require('./app/config/db.config');
+const port = process.env.PORT || 5000;
 require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const port = process.env.PORT || 5000;
-
-// const uri = process.env.ATLAS_URI;
-// mongoose.connect(uri, {
-//   useNewUrlParser: true,
-//   useCreateIndex: true,
-//   useUnifiedTopology: true,
-// });
-
-// const connection = mongoose.connection;
-// connection.once('open', () => {
-//   console.log('MongoDB connection established successfully');
-// });
-
-const usersRouter = require('./app/routes/users');
-const dbConfig = require('./app/config/db.config');
-
-
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
-
-const db = require("./app/models");
-const Role = db.role;
 
 db.mongoose
   .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
@@ -53,31 +35,28 @@ function initial() {
     if (!err && count === 0) {
       new Role({
         name: "user"
-      }).save(err => {
-        if (err) {
-          console.log("error", err);
+      }).save(err1 => {
+        if (err1) {
+          console.log("error", err1);
         }
-
         console.log("added 'user' to roles collection");
       });
 
       new Role({
         name: "moderator"
-      }).save(err => {
-        if (err) {
-          console.log("error", err);
+      }).save(err1 => {
+        if (err1) {
+          console.log("error", err1);
         }
-
         console.log("added 'moderator' to roles collection");
       });
 
       new Role({
         name: "admin"
-      }).save(err => {
-        if (err) {
-          console.log("error", err);
+      }).save(err1 => {
+        if (err1) {
+          console.log("error", err1);
         }
-
         console.log("added 'admin' to roles collection");
       });
     }

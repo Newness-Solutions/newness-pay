@@ -51,7 +51,8 @@ exports.userUpdate = (req, res) => {
 exports.updatePass = (req, res) => {
   User.findByIdAndUpdate({_id:req.userId},
     {
-      password: bcrypt.hashSync(req.body.newPass, 8)
+      password: bcrypt.hashSync(req.body.newPass, 8),
+      passCode: null
     },
     {new: true})
     .then(() => res.status(200).send({message:"Password updated successfully!"}))

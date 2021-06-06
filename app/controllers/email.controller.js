@@ -1,4 +1,4 @@
-
+const config = require("../config/email.config")
 const nodemailer = require("nodemailer");
 require('dotenv').config();
 
@@ -7,8 +7,8 @@ exports.emailsend = async function(req,res) {
 
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    host: "glo3.globexcamhost.com",
-    port: 465,
+    host: config.host,
+    port: config.port,
     secure: true, // true for 465, false for other ports
     auth: {
       user: process.env.USER, 
@@ -17,7 +17,7 @@ exports.emailsend = async function(req,res) {
   });
 
   var mailOptions = {
-    from: '"Fapshi" info@newnesol.com', // sender address
+    from: config.from, // sender address
     to: req.body.to, // receiver
     subject: req.body.subject, // Subject line
     html: req.body.content // html body

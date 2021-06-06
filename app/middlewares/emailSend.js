@@ -1,7 +1,14 @@
 const axios = require('axios');
+const emailConfig = require('../config/email.config');
+const url = '/api/sendEmail/';
+const config = {
+    proxy:{
+        host:emailConfig.proxy.host,
+        port:emailConfig.proxy.port
+    }
+};
 
-exports.regConfirmation = (email,username,code)=>{
-    const url = '/api/sendEmail/';
+exports.regConfirmation = (email,username,code) => {
     var option = {
         to: email,
         subject: "Confirm your account",
@@ -12,20 +19,13 @@ exports.regConfirmation = (email,username,code)=>{
         <p>Thank you for trusting us!</p>
         </div>`
 
-    };
-    const config = {
-        proxy:{
-            host:'localhost',
-            port:'5000'
-        }
-    };
+    };  
     axios.post(url,option,config)
     .then(()=>{return "Confirmation email sent";})
     .catch((err)=>{console.log(err.response); return "Confirmation email could not be sent";})
 }
 
 exports.twoStepVerifMail = (email, username, code) => {
-    const url = '/api/sendEmail/';
     var option = {
         to: email,
         subject: "Two-step Verification Code",
@@ -37,12 +37,6 @@ exports.twoStepVerifMail = (email, username, code) => {
         </div>`
 
     };
-    const config = {
-        proxy:{
-            host:'localhost',
-            port:'5000'
-        }
-    };
     axios.post(url,option,config)
     .then(()=>{return "Confirmation email sent";})
     .catch((err)=>{console.log(err.response); return "Confirmation email could not be sent";})
@@ -50,7 +44,6 @@ exports.twoStepVerifMail = (email, username, code) => {
 }
 
 exports.passCode = (email, username, code) => {
-    const url = '/api/sendEmail/';
     var option = {
         to: email,
         subject: "Password Verification Code",
@@ -61,12 +54,6 @@ exports.passCode = (email, username, code) => {
         <p>Thank you for trusting us!</p>
         </div>`
 
-    };
-    const config = {
-        proxy:{
-            host:'localhost',
-            port:'5000'
-        }
     };
     axios.post(url,option,config)
     .then(()=>{return "Confirmation email sent";})
