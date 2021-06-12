@@ -1,3 +1,4 @@
+require('dotenv').config();
 const axios = require('axios');
 const emailConfig = require('../config/email.config');
 const url = '/api/sendEmail/';
@@ -7,9 +8,11 @@ const config = {
         port:emailConfig.proxy.port
     }
 };
+const secret = process.env.SECRET; 
 
 exports.regConfirmation = (email,username,code) => {
     var option = {
+        secret: secret,
         to: email,
         subject: "Confirm your account",
         content: `
@@ -27,6 +30,7 @@ exports.regConfirmation = (email,username,code) => {
 
 exports.twoStepVerifMail = (email, username, code) => {
     var option = {
+        secret: secret,
         to: email,
         subject: "Two-step Verification Code",
         content: `
@@ -45,6 +49,7 @@ exports.twoStepVerifMail = (email, username, code) => {
 
 exports.passCode = (email, username, code) => {
     var option = {
+        secret: secret,
         to: email,
         subject: "Password Verification Code",
         content: `

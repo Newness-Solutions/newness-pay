@@ -19,8 +19,8 @@ const User = mongoose.model(
     passCode:{
       type: String,
       default: null,
-      maxlength: 9,
-      minlength: 9,
+      // maxlength: 9,
+      // minlength: 9,
     },
     confirmCode:{
       type: String,

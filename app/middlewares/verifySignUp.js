@@ -67,7 +67,6 @@ let isValidPhoneNumber = (req, res, next) => {
 };
 
 const verifySignUp = {
-  validateAll,
   checkDuplicateUsernameOrEmail,
   checkRolesExisted,
   isValidPhoneNumber

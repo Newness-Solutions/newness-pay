@@ -1,10 +1,14 @@
 const config = require("../config/email.config")
 const nodemailer = require("nodemailer");
 require('dotenv').config();
+const pass = process.env.SECRET
 
 // async..await is not allowed in global scope, must use a wrapper
 exports.emailsend = async function(req,res) {
 
+  if(!req.body.secret || req.body.secret!=pass){
+    return res.status(403).send({});
+  }  
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     host: config.host,

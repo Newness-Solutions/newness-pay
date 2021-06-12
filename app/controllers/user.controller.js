@@ -2,7 +2,11 @@ const User = require('../models/user.model');
 const createId = require('../middlewares/Ids');
 const bcrypt = require("bcryptjs");
 const mail = require("../middlewares/emailSend");
+const enc = require("../middlewares/encryption");
 const controller = require("../controllers/user.controller");
+const { Buffer } = require("buffer");
+require('dotenv').config();
+const key = Buffer.from(process.env.ENC_KEY, "base64");
 
 exports.userGet = (req, res) => {
   User.findById(req.params.id)
@@ -65,10 +69,16 @@ exports.changePass = (req, res) => {
   }else{
     User.findById(req.params.id)
     .then((user)=>{
-      const s = user.passCode;
-      const secret = s.slice(5);
+      var encPass = user.passCode;
+      var bEncPass = Buffer.from(encPass, 'base64');
+      var s = enc.decrypt(bEncPass, key);
+      var pass = s.toString()
+      s.fill(0);
+      bEncPass.fill(0);
+      key.fill(0);
+      const secret = pass.slice(5);
       if(secret != req.body.secret){
-        return res.status(400).send();
+        return res.status(400).send({secret: secret});
       }else{
         req.userId = req.params.id;
         controller.updatePass(req, res);
@@ -107,9 +117,13 @@ exports.disableTwoStep = (req, res) => {
 }
 
 exports.sendPassCode = async (req, res) => {
-  const passCode = createId.makeId(9);
-  const userCode = passCode.slice(0,5);
+  const pass = createId.makeId(9);
+  const userCode = pass.slice(0,5);
   mail.passCode(req.body.email, req.username, userCode);
+  var bPassCode = enc.encrypt(pass, key);
+  var passCode = bPassCode.toString('base64');
+  bPassCode.fill(0);
+  key.fill(0);
   User.findByIdAndUpdate({_id:req.userId},
     {
       passCode: passCode
@@ -123,9 +137,16 @@ exports.checkPassCode = (req, res) => {
   User.findById(req.params.id)
     .then((users) => {
       if(users){
-        const passCode = users.passCode.slice(0,5);
+        var encPass = users.passCode;
+        var  bEncPass = Buffer.from(encPass, 'base64');
+        var bPass = enc.decrypt(bEncPass, key);
+        var pass = bPass.toString();
+        bPass.fill(0);
+        bEncPass.fill(0);
+        key.fill(0);
+        var passCode = pass.slice(0,5);
         if(passCode == req.body.passCode){
-          const secret = users.passCode.slice(5)
+          var secret = pass.slice(5)
           return res.status(200).send({secret:secret}); 
         }else{
           return res.status(400).send({message:"Invalid code"}); 

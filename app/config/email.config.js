@@ -1,6 +1,6 @@
 module.exports = {
     host:"glo3.globexcamhost.com",
-    port:456,
+    port:465,
     from:'"Fapshi" info@newnesol.com',
     proxy:{
         host:"localhost",
