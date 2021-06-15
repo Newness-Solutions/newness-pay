@@ -76,6 +76,25 @@ let isAdmin = (req, res, next) => {
   });
 };
 
+let isNotValidated = (req, res, next) =>{
+  if(!req.body.email){
+    return res.status(400).send({message: "Email required!"})
+  }
+  User.findOne({email: req.body.email})
+  .then((user) => {
+    if(!user)
+      return res.status(400).send({message: "This email account does not exist!"})
+    if(user.isValidated)
+      return res.status(401).send({message: "This account has already been validated!"});
+    else{
+      req.confirmCode = user.confirmCode;
+      req.username = user.username;
+      next();
+    }
+  })
+  .catch((err)=>{return res.status(500).send({ message: err });})
+
+}
 
 let checkDuplicateEmail = (req, res, next) => {
   // Email
@@ -103,6 +122,9 @@ let emailExists = (req, res, next) =>{
   User.findOne({email:req.body.email})
   .then((user)=>{
     if(user){
+      if(!user.isValidated){
+        return res.status(401).send({message: "This account has not been validated!"});
+      }
       req.username = user.username;
       req.userId = user._id;
       next();
@@ -148,6 +170,7 @@ const authJwt = {
   sameUser,
   validPassword,
   isAdmin,
+  isNotValidated,
   checkDuplicateEmail,
   emailExists,
   isModerator

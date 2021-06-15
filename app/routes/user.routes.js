@@ -57,7 +57,6 @@ module.exports = function(app) {
         controller.changePass(req, res);
       }
     }  
-
   )
 
   app.put(
@@ -79,7 +78,14 @@ module.exports = function(app) {
     [
       authJwt.emailExists
     ], 
-    controller.sendPassCode);  
+    controller.sendPassCode);
+    
+    app.post(
+    "/api/test/user/resent-account-confirmation-code", 
+    [
+      authJwt.isNotValidated
+    ], 
+    controller.sendConfirmationCode);  
 
   app.put(
     "/api/test/user/check-password-code/:id",

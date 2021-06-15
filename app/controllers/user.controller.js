@@ -157,5 +157,9 @@ exports.checkPassCode = (req, res) => {
       
     })
     .catch(() => res.status(400).send({message:"Invalid URL"}));
+}
 
+exports.sendConfirmationCode = (req, res) => {
+  mail.regConfirmation(req.body.email, req.username, req.confirmCode);
+  return res.status(200).send({message:"Account confirmation code has been sent successfully!"});
 }

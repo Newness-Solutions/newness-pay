@@ -1,12 +1,11 @@
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const mail = require("../middlewares/emailSend");
 const config = require("../config/auth.config");
 const db = require("../models");
 const createId = require('../middlewares/Ids');
 const User = db.user;
 const Role = db.role;
-
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
-const mail = require("../middlewares/emailSend");
 
 
 exports.signup = (req, res) => {
@@ -184,7 +183,7 @@ exports.checkCode = (req, res) => {
     if(user.isValidated){
       return res.status(403).send({message: "Account already validated"})
     }
-    if(req.body.code == user.confirmCode){
+    if(req.body.code === user.confirmCode){
       User.findByIdAndUpdate({_id: user._id},
         {
           isValidated: true    
