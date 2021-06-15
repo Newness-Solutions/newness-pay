@@ -18,7 +18,7 @@ const Balance = mongoose.model(
             }
         ],
         balance:{
-            type: Int32,
+            type: Number,
             required: true
         }
     },

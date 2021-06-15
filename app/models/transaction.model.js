@@ -1,4 +1,3 @@
-const { Int32 } = require("mongodb");
 const mongoose = require("mongoose");
 
 
@@ -32,7 +31,7 @@ const Transaction = mongoose.model(
             required: true
         },
         amount:{
-            type: Int32,
+            type: Number,
             required: true
         },
         mediumId: String,
