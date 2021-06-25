@@ -4,9 +4,10 @@ const app = express();
 const db = require("./app/models");
 const Role = db.role;
 const usersRouter = require('./app/routes/users');
-const dbConfig = require('./app/config/db.config');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
+// const dbConfig = require('./app/config/db.config');
+
 
 app.use(cors());
 app.use(express.json());
@@ -16,8 +17,9 @@ app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
 
+// `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`
 db.mongoose
-  .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
+  .connect(process.env.ATLAS_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })

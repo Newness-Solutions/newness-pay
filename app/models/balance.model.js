@@ -19,6 +19,7 @@ const Balance = mongoose.model(
         ],
         balance:{
             type: Number,
+            min: 0,
             required: true
         }
     },
@@ -26,5 +27,15 @@ const Balance = mongoose.model(
         timestamps: true
     })
 );
+
+exports.newBalance = (data) => {
+    var balance = new Balance(data);
+    balance.save((err) =>{
+        if (err)
+            console.log(err);
+        return "New Balance registered!";
+    })
+}
+
 
 module.exports = Balance;

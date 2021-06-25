@@ -6,11 +6,12 @@ const db = require("../models");
 const createId = require('../middlewares/Ids');
 const User = db.user;
 const Role = db.role;
-
+const Trans = db.transaction;
+const Balance = db.balance;
 
 exports.signup = (req, res) => {
   const code = createId.makeId(6); 
-  const user = new User({
+  const users = new User({
     username: req.body.username,
     email: req.body.email,
     phone_number: req.body.phone,
@@ -19,7 +20,7 @@ exports.signup = (req, res) => {
     password: bcrypt.hashSync(req.body.password, 8)
   });
 
-  user.save(async(err, user) => {
+  users.save(async(err, user) => {
     if (err) {
       res.status(500).send({ message: err });
       return;
@@ -31,16 +32,16 @@ exports.signup = (req, res) => {
         {
           name: { $in: req.body.roles }
         },
-        (err, roles) => {
-          if (err) {
-            res.status(500).send({ message: err });
+        (err1, roles) => {
+          if (err1) {
+            res.status(500).send({ message: err1 });
             return;
           }
 
           user.roles = roles.map(role => role._id);
-          user.save(err => {
-            if (err) {
-              res.status(500).send({ message: err });
+          user.save(err2 => {
+            if (err2) {
+              res.status(500).send({ message: err2 });
               return;
             }
 
@@ -50,16 +51,16 @@ exports.signup = (req, res) => {
         }
       );
     } else {
-      Role.findOne({ name: "user" }, (err, role) => {
-        if (err) {
-          res.status(500).send({ message: err });
+      Role.findOne({ name: "user" }, (err3, role) => {
+        if (err3) {
+          res.status(500).send({ message: err3 });
           return;
         }
 
         user.roles = [role._id];
-        user.save(err => {
-          if (err) {
-            res.status(500).send({ message: err });
+        user.save(err4 => {
+          if (err4) {
+            res.status(500).send({ message: err4 });
             return;
           }
 
@@ -107,25 +108,7 @@ exports.signin = (req, res) => {
         return res.status(200).send({id: user._id, message: "Enter code from email"});
 
       }else{
-
-      var token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: 86400 // 24 hours
-      });
-
-      var authorities = [];
-
-      for(const val of user.roles){
-        authorities.push("ROLE_"+ val.name.toUpperCase());
-      }
-      res.status(200).send({
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone_number,
-        date_created: user.date_created,
-        roles: authorities,
-        accessToken: token
-      });
+        userInfo(user, res);
     }
     });
 };
@@ -146,25 +129,8 @@ exports.twoStepVerif = (req, res) => {
           twoStepCode: twoStepCode
         },
         {new: true})
-        .then((nUser) => {
-          var token = jwt.sign({ id: nUser._id }, config.secret, {
-            expiresIn: 86400 // 24 hours
-          });
-    
-          var authorities = [];
-    
-          for(const val of user.roles){
-            authorities.push("ROLE_"+ val.name.toUpperCase());
-          }
-          return res.status(200).send({
-            id: nUser._id,
-            username: nUser.username,
-            email: nUser.email,
-            phone: nUser.phone_number,
-            date_created: nUser.date_created,
-            roles: authorities,
-            accessToken: token
-          })
+        .then(() => {
+          userInfo(user, res);
         })  
         .catch((error) => res.status(400).send(error))
     }
@@ -184,36 +150,56 @@ exports.checkCode = (req, res) => {
       return res.status(403).send({message: "Account already validated"})
     }
     if(req.body.code === user.confirmCode){
+      const trans = new Trans({
+        userId: user._id,
+        status: "successful",
+        amount: 0
+      });
+      trans.save((er, val)=>{
+        if(er)
+          console.log(er);
+        const balance = new Balance({
+          userId: user._id,
+          TransId: val._id,
+          balance: 0
+        });
+        balance.save();
+      })
       User.findByIdAndUpdate({_id: user._id},
         {
-          isValidated: true    
+          isValidated: true,
+          confirmCode: null
         }, 
         {new: true, useFindAndModify: false})
-        .then(nUser => {
-
-          var token = jwt.sign({ id: nUser._id }, config.secret, {
-            expiresIn: 86400 // 24 hours
-          });
-    
-          var authorities = [];
-    
-          for(const val of user.roles){
-            authorities.push("ROLE_"+ val.name.toUpperCase());
-          }
-          return res.status(200).send({
-            id: nUser._id,
-            username: nUser.username,
-            email: nUser.email,
-            phone: nUser.phone_number,
-            date_created: nUser.date_created,
-            roles: authorities,
-            accessToken: token
-          })
+        .then(() => {
+          userInfo(user, res);
         })
         .catch((error) => {res.status(400).send({message: error})})
     }else{
       return res.status(400).send({message: "Invalid Confirmation code"});
     }
-  })
-    
+  })   
+}
+
+
+function userInfo(user, res){ 
+
+  var token = jwt.sign({ id: user.id }, config.secret, {
+    expiresIn: 86400 // 24 hours
+  });
+
+  var authorities = [];
+
+  for(const val of user.roles){
+    authorities.push("ROLE_"+ val.name.toUpperCase());
+  }
+  return res.status(200).send({
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    phone: user.phone_number,
+    date_created: user.date_created,
+    roles: authorities,
+    accessToken: token
+  });
 }

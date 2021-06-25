@@ -42,7 +42,7 @@ exports.twoStepVerifMail = (email, username, code) => {
 
     };
     axios.post(url,option,config)
-    .then(()=>{return "Confirmation email sent";})
+    .then(()=>{return "Two step verification email sent";})
     .catch((err)=>{console.log(err.response); return "Confirmation email could not be sent";})
 
 }
@@ -61,7 +61,7 @@ exports.passCode = (email, username, code) => {
 
     };
     axios.post(url,option,config)
-    .then(()=>{return "Confirmation email sent";})
+    .then(()=>{return "Password verification email sent";})
     .catch((err)=>{console.log(err.response); return "Confirmation email could not be sent";})
 
 }
